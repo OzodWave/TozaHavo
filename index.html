@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#16b364" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>TozaHavo — Real-Time Air Quality · Tashkent</title>
+    <meta name="description"
+        content="TozaHavo provides real-time air quality monitoring across all 11 districts of Tashkent. Track AQI, PM2.5, and pollutant levels live." />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#edfcf2',
+                            100: '#d3f8e0',
+                            200: '#aaf0c6',
+                            300: '#73e2a3',
+                            400: '#3acd7b',
+                            500: '#16b364',
+                            600: '#0a9150',
+                            700: '#087442',
+                            800: '#095c37',
+                            900: '#084c2e',
+                        },
+                        surface: {
+                            0: '#ffffff',
+                            50: '#f8fafb',
+                            100: '#f1f4f6',
+                            200: '#e4e8ec',
+                            300: '#cdd3da',
+                            400: '#9ba5b1',
+                            500: '#6b7685',
+                            600: '#4b5563',
+                            700: '#374151',
+                            800: '#1f2937',
+                            900: '#111827',
+                            950: '#0a0f18',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ═══════════════════════════════════════════════════
+           THEME SYSTEM — CSS Custom Properties
+           ═══════════════════════════════════════════════════ */
+
+        /* ── DARK THEME (Default) ────────────────────────── */
+        [data-theme="dark"] {
+            --bg-body: #0d1117;
+            --bg-body-grad-1: rgba(22, 179, 100, 0.08);
+            --bg-body-grad-2: rgba(58, 205, 123, 0.06);
+            --bg-body-grad-3: rgba(10, 15, 24, 1);
+
+            --text-primary: #f1f4f6;
+            --text-secondary: rgba(255, 255, 255, 0.50);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            --text-faint: rgba(255, 255, 255, 0.25);
+            --text-ghost: rgba(255, 255, 255, 0.15);
+
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-dark-bg: rgba(10, 15, 24, 0.65);
+            --glass-dark-border: rgba(255, 255, 255, 0.06);
+            --glass-sidebar-bg: rgba(15, 20, 30, 0.75);
+
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --card-hover-bg: rgba(255, 255, 255, 0.06);
+            --card-hover-border: rgba(255, 255, 255, 0.12);
+            --card-active-bg: rgba(22, 179, 100, 0.10);
+            --card-active-border: rgba(22, 179, 100, 0.30);
+
+            --sidebar-border: rgba(255, 255, 255, 0.06);
+            --scrollbar-thumb: rgba(255, 255, 255, 0.12);
+            --scrollbar-hover: rgba(255, 255, 255, 0.20);
+
+            --pill-hover-shadow: rgba(22, 179, 100, 0.12);
+            --glow-shadow-1: rgba(22, 179, 100, 0.12);
+            --glow-shadow-2: rgba(22, 179, 100, 0.06);
+
+            --map-bg: #0d1117;
+            --map-border: rgba(255, 255, 255, 0.08);
+
+            --blob-opacity-1: 0.15;
+            --blob-opacity-2: 0.10;
+
+            --footer-border: rgba(255, 255, 255, 0.06);
+
+            --leaflet-ctrl-bg: rgba(15, 20, 30, 0.85);
+            --leaflet-ctrl-color: #f1f4f6;
+            --leaflet-ctrl-border: rgba(255, 255, 255, 0.08);
+            --leaflet-attr-bg: rgba(0, 0, 0, 0.4);
+            --leaflet-attr-color: rgba(255, 255, 255, 0.5);
+
+            --ring-track: rgba(255, 255, 255, 0.07);
+
+            --legend-swatch-shadow: rgba(0, 0, 0, 0.3);
+            --shimmer-color: rgba(22, 179, 100, 0.3);
+            --shimmer-highlight: rgba(22, 179, 100, 0.5);
+
+            --switch-bg: rgba(255, 255, 255, 0.05);
+            --switch-border: rgba(255, 255, 255, 0.08);
+            --switch-text: rgba(255, 255, 255, 0.45);
+            --switch-active-bg: #16b364;
+            --switch-active-text: #fff;
+        }
+
+        /* ── LIGHT THEME ─────────────────────────────────── */
+        [data-theme="light"] {
+            --bg-body: #f1f4f6;
+            --bg-body-grad-1: rgba(22, 179, 100, 0.06);
+            --bg-body-grad-2: rgba(58, 205, 123, 0.04);
+            --bg-body-grad-3: rgba(241, 244, 246, 1);
+
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-muted: #6b7685;
+            --text-faint: #9ba5b1;
+            --text-ghost: #cdd3da;
+
+            --glass-bg: rgba(255, 255, 255, 0.72);
+            --glass-border: rgba(255, 255, 255, 0.55);
+            --glass-dark-bg: rgba(10, 15, 24, 0.65);
+            --glass-dark-border: rgba(255, 255, 255, 0.08);
+            --glass-sidebar-bg: rgba(255, 255, 255, 0.80);
+
+            --card-bg: rgba(255, 255, 255, 0.60);
+            --card-border: rgba(0, 0, 0, 0.06);
+            --card-hover-bg: rgba(255, 255, 255, 0.85);
+            --card-hover-border: rgba(0, 0, 0, 0.10);
+            --card-active-bg: rgba(22, 179, 100, 0.08);
+            --card-active-border: rgba(22, 179, 100, 0.25);
+
+            --sidebar-border: rgba(0, 0, 0, 0.06);
+            --scrollbar-thumb: #cdd3da;
+            --scrollbar-hover: #9ba5b1;
+
+            --pill-hover-shadow: rgba(0, 0, 0, 0.08);
+            --glow-shadow-1: rgba(22, 179, 100, 0.08);
+            --glow-shadow-2: rgba(22, 179, 100, 0.04);
+
+            --map-bg: #e4e8ec;
+            --map-border: rgba(0, 0, 0, 0.08);
+
+            --blob-opacity-1: 0.20;
+            --blob-opacity-2: 0.15;
+
+            --footer-border: rgba(0, 0, 0, 0.06);
+
+            --leaflet-ctrl-bg: rgba(255, 255, 255, 0.92);
+            --leaflet-ctrl-color: #1f2937;
+            --leaflet-ctrl-border: rgba(0, 0, 0, 0.08);
+            --leaflet-attr-bg: rgba(255, 255, 255, 0.75);
+            --leaflet-attr-color: rgba(0, 0, 0, 0.5);
+
+            --ring-track: rgba(255, 255, 255, 0.07);
+
+            --legend-swatch-shadow: rgba(0, 0, 0, 0.12);
+            --shimmer-color: rgba(22, 179, 100, 0.2);
+            --shimmer-highlight: rgba(22, 179, 100, 0.35);
+
+            --switch-bg: rgba(0, 0, 0, 0.04);
+            --switch-border: rgba(0, 0, 0, 0.08);
+            --switch-text: #6b7685;
+            --switch-active-bg: #16b364;
+            --switch-active-text: #fff;
+        }
+
+        /* ═══════════════════════════════════════════════════
+           GLOBAL THEME TRANSITION
+           ═══════════════════════════════════════════════════ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body, .glass, .glass-dark, .glass-sidebar, .stat-pill, .district-card,
+        .district-card-name, .district-card-live, nav, footer, main, aside,
+        h1, h2, h3, p, span, a, li, div, section {
+            transition: background 0.35s ease, color 0.35s ease,
+                        border-color 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        /* ── Animated gradient background ─────────────── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, var(--bg-body-grad-1), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 80%, var(--bg-body-grad-2), transparent),
+                radial-gradient(ellipse 50% 50% at 50% 50%, var(--bg-body-grad-3), transparent);
+            transition: background 0.35s ease;
+        }
+
+        /* ── Glassmorphism ────────────────────────────── */
+        .glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+            border: 1px solid var(--glass-border);
+        }
+
+        .glass-dark {
+            background: var(--glass-dark-bg);
+            backdrop-filter: blur(24px) saturate(1.8);
+            -webkit-backdrop-filter: blur(24px) saturate(1.8);
+            border: 1px solid var(--glass-dark-border);
+            color: #f1f4f6;
+        }
+
+        .glass-sidebar {
+            background: var(--glass-sidebar-bg);
+            backdrop-filter: blur(30px) saturate(1.8);
+            -webkit-backdrop-filter: blur(30px) saturate(1.8);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* ── AQI ring animation ──────────────────────── */
+        @keyframes dash-draw {
+            from { stroke-dashoffset: 440; }
+        }
+
+        .aqi-ring {
+            animation: dash-draw 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        /* ── Float animation ─────────────────────────── */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* ── Fade-up entrance ────────────────────────── */
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-up {
+            opacity: 0;
+            animation: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .delay-1 { animation-delay: 0.08s; }
+        .delay-2 { animation-delay: 0.18s; }
+        .delay-3 { animation-delay: 0.28s; }
+        .delay-4 { animation-delay: 0.38s; }
+        .delay-5 { animation-delay: 0.48s; }
+        .delay-6 { animation-delay: 0.58s; }
+
+        /* ── Stat pill hover ─────────────────────────── */
+        .stat-pill {
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.3s ease, border-color 0.3s ease,
+                background 0.35s ease, color 0.35s ease;
+        }
+
+        .stat-pill:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px -8px var(--pill-hover-shadow);
+            border-color: var(--card-hover-border);
+        }
+
+        /* ── Themed text helpers ──────────────────────── */
+        .t-primary   { color: var(--text-primary); }
+        .t-secondary { color: var(--text-secondary); }
+        .t-muted     { color: var(--text-muted); }
+        .t-faint     { color: var(--text-faint); }
+        .t-ghost     { color: var(--text-ghost); }
+
+        /* ── Scrollbar ───────────────────────────────── */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+
+        /* ── Leaflet overrides ───────────────────────── */
+        .leaflet-control-attribution {
+            font-family: 'Outfit', sans-serif !important;
+            font-size: 10px !important;
+            background: var(--leaflet-attr-bg) !important;
+            color: var(--leaflet-attr-color) !important;
+        }
+
+        .leaflet-control-attribution a {
+            color: var(--leaflet-attr-color) !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px !important;
+            font-family: 'Outfit', sans-serif !important;
+        }
+
+        .leaflet-control-zoom a {
+            background: var(--leaflet-ctrl-bg) !important;
+            color: var(--leaflet-ctrl-color) !important;
+            border-color: var(--leaflet-ctrl-border) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .leaflet-control-zoom a:hover {
+            background: rgba(22, 179, 100, 0.3) !important;
+        }
+
+        /* ── Noise texture overlay ────────────────────── */
+        .noise::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.03;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 128px 128px;
+            border-radius: inherit;
+        }
+
+        /* ── Alert pulse ─────────────────────────────── */
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .65; }
+        }
+
+        .pulse-soft {
+            animation: pulse-soft 2.4s ease-in-out infinite;
+        }
+
+        /* ── District sidebar cards ──────────────────── */
+        .district-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .district-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(22,179,100,0.05), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: inherit;
+        }
+
+        .district-card:hover {
+            background: var(--card-hover-bg);
+            border-color: var(--card-hover-border);
+            transform: translateX(4px);
+        }
+
+        .district-card:hover::before {
+            opacity: 1;
+        }
+
+        .district-card--active {
+            background: var(--card-active-bg) !important;
+            border-color: var(--card-active-border) !important;
+            box-shadow: 0 0 20px rgba(22, 179, 100, 0.08);
+        }
+
+        .district-card--active::before {
+            opacity: 1 !important;
+        }
+
+        .district-card-gauge {
+            flex-shrink: 0;
+        }
+
+        .district-card-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+            position: relative;
+        }
+
+        .district-card-name {
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .district-card-live {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: pulse-soft 2.4s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        /* ── Dashboard layout ────────────────────────── */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 0;
+            min-height: calc(100vh - 64px);
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .sidebar-panel {
+                max-height: 380px;
+            }
+        }
+
+        .sidebar-panel {
+            border-right: 1px solid var(--sidebar-border);
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        /* ── Map container ───────────────────────────── */
+        #map {
+            background: var(--map-bg);
+        }
+
+        /* ── Glow accents ────────────────────────────── */
+        .glow-green {
+            box-shadow: 0 0 40px var(--glow-shadow-1), 0 0 80px var(--glow-shadow-2);
+        }
+
+        /* ── Shimmer line ────────────────────────────── */
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .shimmer-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--shimmer-color), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+            overflow: hidden;
+        }
+
+        .shimmer-line::after {
+            content: '';
+            display: block;
+            height: 1px;
+            width: 100%;
+            background: linear-gradient(90deg, transparent, var(--shimmer-highlight), transparent);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           LANGUAGE SWITCHER
+           ═══════════════════════════════════════════════════ */
+        .lang-switcher {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 3px;
+            border-radius: 10px;
+            background: var(--switch-bg);
+            border: 1px solid var(--switch-border);
+            backdrop-filter: blur(12px);
+        }
+
+        .lang-pill {
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--switch-text);
+            border-radius: 7px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+            letter-spacing: 0.01em;
+            line-height: 1.4;
+        }
+
+        .lang-pill:hover {
+            color: var(--text-primary);
+            background: rgba(22, 179, 100, 0.08);
+        }
+
+        .lang-pill--active {
+            background: var(--switch-active-bg) !important;
+            color: var(--switch-active-text) !important;
+            box-shadow: 0 2px 8px rgba(22, 179, 100, 0.25);
+        }
+
+        /* ── Theme toggle ────────────────────────────── */
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: var(--switch-bg);
+            border: 1px solid var(--switch-border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(12px);
+        }
+
+        .theme-toggle:hover {
+            color: var(--text-primary);
+            background: rgba(22, 179, 100, 0.10);
+            border-color: rgba(22, 179, 100, 0.20);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           AQI COLOR LEGEND
+           ═══════════════════════════════════════════════════ */
+        .color-legend {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .color-legend {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            transition: all 0.3s ease;
+        }
+
+        .legend-item:hover {
+            background: var(--card-hover-bg);
+            border-color: var(--card-hover-border);
+            transform: translateY(-2px);
+        }
+
+        .legend-swatch {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px var(--legend-swatch-shadow);
+        }
+
+        .legend-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .legend-range {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 0.75rem;
+            color: var(--text-faint);
+        }
+
+        .legend-label {
+            font-weight: 700;
+            font-size: 0.82rem;
+            color: var(--text-primary);
+            line-height: 1.3;
+        }
+
+        .legend-desc {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        /* ── Light theme refinements ─────────────────── */
+        [data-theme="light"] .glass-dark {
+            background: rgba(10, 15, 24, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+        }
+
+        [data-theme="light"] .district-card svg circle[stroke="rgba(255,255,255,0.08)"] {
+            stroke: rgba(0, 0, 0, 0.08);
+        }
+
+        [data-theme="light"] body::before {
+            background:
+                radial-gradient(ellipse 80% 50% at 20% 10%, var(--bg-body-grad-1), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 80%, var(--bg-body-grad-2), transparent),
+                radial-gradient(ellipse 50% 50% at 50% 50%, var(--bg-body-grad-3), transparent);
+        }
+
+        /* ═══════════════════════════════════════════════════
+           MOBILE MENU
+           ═══════════════════════════════════════════════════ */
+        .mobile-backdrop {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .mobile-panel {
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .mobile-menu-open .mobile-backdrop { opacity: 1; }
+        .mobile-menu-open .mobile-panel { transform: translateX(0); }
+
+        /* ═══════════════════════════════════════════════════
+           MOBILE RESPONSIVE — ≤768px
+           ═══════════════════════════════════════════════════ */
+        @media (max-width: 768px) {
+            * { -webkit-tap-highlight-color: transparent; }
+            body { touch-action: manipulation; }
+
+            /* Navbar */
+            #nav-links, #lang-switcher, #theme-toggle { display: none !important; }
+            #live-indicator { display: flex !important; font-size: 0.65rem; padding: 4px 8px; }
+            .brand-text { font-size: 1rem !important; }
+
+            /* Dashboard grid → single column */
+            .dashboard-grid {
+                grid-template-columns: 1fr !important;
+                min-height: auto;
+            }
+
+            /* Sidebar → horizontal scroll strip */
+            .sidebar-panel {
+                border-right: none !important;
+                border-bottom: 1px solid var(--sidebar-border);
+                max-height: none !important;
+                overflow-y: visible;
+                padding: 12px 16px !important;
+                order: 5;
+            }
+            .sidebar-panel > .mb-4 { display: none; }
+            .sidebar-panel > .shimmer-line { display: none; }
+            #district-list {
+                flex-direction: row !important;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: 12px;
+                padding-bottom: 8px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            #district-list::-webkit-scrollbar { display: none; }
+            #district-list .district-card {
+                min-width: 155px;
+                flex-shrink: 0;
+                scroll-snap-align: start;
+                padding: 10px 12px;
+            }
+            #district-list .district-card:hover { transform: none; }
+
+            /* AQI Hero Card */
+            .glow-green { padding: 20px !important; }
+            .glow-green .absolute { width: 60% !important; height: 60% !important; }
+            .glow-green svg { width: 130px; height: 130px; }
+            .glow-green svg text#aqi-main-value { font-size: 34px; }
+            .glow-green .flex-col.sm\:flex-row { flex-direction: column !important; }
+            .glow-green .flex-1.text-center { text-align: center !important; }
+            .glow-green h2 { font-size: 1.25rem !important; }
+            .glow-green p.mt-2 { font-size: 0.8rem !important; }
+
+            /* Recommendations */
+            #recommendation-card { padding: 16px !important; }
+            #recommendation-text { font-size: 0.78rem; }
+
+            /* Quick stats */
+            .grid.grid-cols-3 .glass.rounded-2xl .w-10 { display: none; }
+            #dominant-card, #stations-card, #humidity-card { padding: 10px 12px !important; }
+            #dominant-card p:first-child, #stations-card p:first-child, #humidity-card p:first-child { font-size: 0.6rem !important; }
+            #dominant-card p:last-of-type, #stations-card .text-lg, #humidity-value { font-size: 1rem !important; }
+
+            /* Pollutant pills */
+            .grid.xl\:grid-cols-6 { grid-template-columns: repeat(3, 1fr) !important; gap: 8px; }
+            .stat-pill { padding: 10px 8px !important; }
+            .stat-pill .text-xl { font-size: 1rem !important; }
+            .stat-pill:hover { transform: none; }
+
+            /* Color legend */
+            .color-legend { grid-template-columns: 1fr !important; }
+            .legend-item { padding: 10px; }
+
+            /* Map section */
+            #map { min-height: 350px !important; }
+            #map-section h2 { font-size: 1.1rem !important; }
+
+            /* Footer */
+            footer { flex-direction: column !important; text-align: center; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; }
+
+            /* Typography */
+            h1.text-2xl { font-size: 1.5rem !important; }
+            section .p-5 { padding: 16px !important; }
+        }
+
+        /* ── Safe areas (iPhone notch) ──────────────────── */
+        @supports (padding: env(safe-area-inset-top)) {
+            @media (max-width: 768px) {
+                #navbar { padding-top: env(safe-area-inset-top); }
+                footer { padding-bottom: env(safe-area-inset-bottom); }
+                .mobile-panel { padding-top: env(safe-area-inset-top); }
+            }
+        }
+
+        /* ── Reduced motion ────────────────────────────── */
+        @media (prefers-reduced-motion: reduce) {
+            .float, .pulse-soft, .pulse-live, .aqi-ring, .mini-ring, .fade-up, .card-stagger > * {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <!-- ╔══════════════════════════════════════════════╗
+       ║  NAVBAR                                      ║
+       ╚══════════════════════════════════════════════╝ -->
+    <nav class="glass sticky top-0 z-50 fade-up" id="navbar">
+        <div class="max-w-[1600px] mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+            <!-- Brand -->
+            <a href="#" class="flex items-center gap-2.5 group" id="brand-link">
+                <div
+                    class="w-9 h-9 rounded-xl bg-brand-500 flex items-center justify-center shadow-md shadow-brand-500/25 transition-transform duration-300 group-hover:scale-110">
+                    <i class="ph-bold ph-wind text-white text-lg"></i>
+                </div>
+                <span class="text-[1.15rem] font-bold tracking-tight t-primary">
+                    Toza<span class="text-brand-400">Havo</span>
+                </span>
+            </a>
+
+            <!-- Nav links -->
+            <div class="hidden sm:flex items-center gap-1" id="nav-links">
+                <a href="#dashboard"
+                    class="px-3.5 py-1.5 text-[0.82rem] font-medium t-secondary rounded-lg hover:bg-brand-500/5 transition"
+                    data-i18n="nav_dashboard">Boshqaruv paneli</a>
+                <a href="#map-section"
+                    class="px-3.5 py-1.5 text-[0.82rem] font-medium t-secondary rounded-lg hover:bg-brand-500/5 transition"
+                    data-i18n="nav_map">Xarita</a>
+                <a href="#"
+                    class="px-3.5 py-1.5 text-[0.82rem] font-medium t-secondary rounded-lg hover:bg-brand-500/5 transition"
+                    data-i18n="nav_about">Haqida</a>
+            </div>
+
+            <!-- Right side: Lang Switcher + Theme Toggle + Live -->
+            <div class="flex items-center gap-2.5">
+                <!-- Language Switcher -->
+                <div class="lang-switcher" id="lang-switcher">
+                    <button class="lang-pill lang-pill--active" data-lang="uz">O'z</button>
+                    <button class="lang-pill" data-lang="ru">Ру</button>
+                    <button class="lang-pill" data-lang="en">En</button>
+                </div>
+
+                <!-- Theme Toggle -->
+                <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+                    <i class="ph-bold ph-sun text-lg" id="theme-toggle-icon"></i>
+                </button>
+
+                <!-- Live indicator -->
+                <div
+                    class="hidden md:flex items-center gap-1.5 text-xs font-mono t-faint rounded-lg px-3 py-1.5"
+                    style="background: var(--switch-bg); border: 1px solid var(--switch-border);"
+                    id="live-indicator">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-soft"></span>
+                    <span data-i18n="live_indicator">Jonli · Toshkent</span>
+                </div>
+
+                <button
+                    class="sm:hidden w-9 h-9 flex items-center justify-center rounded-lg transition t-muted"
+                    style="background: var(--switch-bg);"
+                    id="mobile-menu-btn">
+                    <i class="ph-bold ph-list text-xl"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ── MOBILE MENU OVERLAY ──────────────────────── -->
+    <div id="mobile-menu" class="fixed inset-0 z-[60] pointer-events-none" style="display:none;">
+        <div class="mobile-backdrop absolute inset-0 bg-black/60 backdrop-blur-sm" id="mobile-backdrop"></div>
+        <div class="mobile-panel absolute top-0 right-0 h-full w-[80%] max-w-[320px] glass-sidebar p-6 flex flex-col" id="mobile-panel">
+            <button class="self-end w-10 h-10 flex items-center justify-center rounded-lg mb-6 t-muted" style="background: var(--switch-bg);" id="mobile-close">
+                <i class="ph-bold ph-x text-xl"></i>
+            </button>
+            <nav class="flex flex-col gap-2 mb-8">
+                <a href="#dashboard" class="px-4 py-3 text-[0.92rem] font-medium t-secondary rounded-xl hover:bg-brand-500/10 transition" data-i18n="nav_dashboard" data-mobile-link>Boshqaruv paneli</a>
+                <a href="#map-section" class="px-4 py-3 text-[0.92rem] font-medium t-secondary rounded-xl hover:bg-brand-500/10 transition" data-i18n="nav_map" data-mobile-link>Xarita</a>
+                <a href="#" class="px-4 py-3 text-[0.92rem] font-medium t-secondary rounded-xl hover:bg-brand-500/10 transition" data-i18n="nav_about" data-mobile-link>Haqida</a>
+            </nav>
+            <div class="mb-6">
+                <p class="text-[0.7rem] t-muted font-semibold uppercase tracking-wider mb-2">Til / Language</p>
+                <div class="lang-switcher" id="mobile-lang-switcher">
+                    <button class="lang-pill lang-pill--active" data-lang="uz">O'z</button>
+                    <button class="lang-pill" data-lang="ru">Ру</button>
+                    <button class="lang-pill" data-lang="en">En</button>
+                </div>
+            </div>
+            <div>
+                <p class="text-[0.7rem] t-muted font-semibold uppercase tracking-wider mb-2">Mavzu / Theme</p>
+                <button class="theme-toggle flex items-center gap-2 w-full justify-center" id="mobile-theme-toggle">
+                    <i class="ph-bold ph-sun text-lg" id="mobile-theme-icon"></i>
+                    <span class="text-sm t-secondary" id="mobile-theme-label">Yorug' rejim</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ╔══════════════════════════════════════════════╗
+       ║  MAIN DASHBOARD                              ║
+       ╚══════════════════════════════════════════════╝ -->
+    <div class="dashboard-grid" id="dashboard">
+
+        <!-- ── SIDEBAR ───────────────────────────────── -->
+        <aside class="sidebar-panel glass-sidebar p-4 fade-up delay-1" id="sidebar">
+            <!-- Sidebar header -->
+            <div class="mb-4">
+                <h2 class="text-[0.95rem] font-bold t-primary tracking-tight flex items-center gap-2">
+                    <i class="ph-bold ph-map-pin text-brand-400"></i>
+                    <span data-i18n="sidebar_title">Toshkent tumanlari</span>
+                </h2>
+                <p class="text-[0.72rem] t-muted mt-1 font-light" data-i18n="sidebar_subtitle">Xaritada ko'rish uchun tumanni bosing</p>
+            </div>
+
+            <div class="shimmer-line mb-4"></div>
+
+            <!-- District cards container (static, updated by app.js) -->
+            <div id="district-list" class="flex flex-col gap-2">
+                <div class="district-card" data-district="bektemir"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_bektemir">Bektemir</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="chilonzor"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_chilonzor">Chilonzor</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="mirobod"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_mirobod">Mirobod</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="mirzo-ulugbek"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_mirzo_ulugbek">Mirzo Ulug'bek</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="olmazor"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_olmazor">Olmazor</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="sergeli"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_sergeli">Sergeli</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="shayxontohur"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_shayxontohur">Shayxontohur</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="uchtepa"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_uchtepa">Uchtepa</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="yakkasaroy"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_yakkasaroy">Yakkasaroy</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="yunusobod"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_yunusobod">Yunusobod</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+                <div class="district-card" data-district="yashnobod"><div class="district-card-gauge"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4"/><circle cx="24" cy="24" r="18" fill="none" stroke="var(--card-border)" stroke-width="4" stroke-linecap="round" stroke-dasharray="138" stroke-dashoffset="138" transform="rotate(-90 24 24)" class="mini-ring"/><text x="24" y="28" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-family="Outfit" font-weight="700" font-size="14">—</text></svg></div><div class="district-card-info"><span class="district-card-name" data-i18n="district_yashnobod">Yashnobod</span><p class="text-[0.7rem] font-medium mt-0.5 t-muted">—</p></div></div>
+            </div>
+        </aside>
+
+
+        <!-- ── MAIN CONTENT ──────────────────────────── -->
+        <main class="flex flex-col overflow-y-auto">
+
+            <!-- ── Top Stats Section ─────────────────── -->
+            <section class="p-5 sm:p-8" id="stats-section">
+
+                <!-- Page heading -->
+                <div class="fade-up delay-2 mb-6">
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight t-primary leading-tight"
+                        data-i18n="page_title">
+                        Havo Sifati Indeksi
+                    </h1>
+                    <p class="mt-1.5 t-muted text-[0.88rem] font-light max-w-xl"
+                        data-i18n="page_subtitle">
+                        Toshkent bo'ylab real vaqtda ifloslanish monitoringi — 11 ta sensor stansiyasidan har 5 daqiqada yangilanadi.
+                    </p>
+                </div>
+
+                <!-- ── Top Grid: AQI Score + Recommendation ── -->
+                <div class="grid grid-cols-1 xl:grid-cols-5 gap-5">
+
+                    <!-- AQI SCORE CARD -->
+                    <div class="xl:col-span-3 glass-dark rounded-2xl p-7 sm:p-9 relative overflow-hidden noise fade-up delay-2 glow-green">
+                        <!-- Decorative gradient blobs -->
+                        <div class="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl pointer-events-none"
+                            style="background: rgba(58,205,123, var(--blob-opacity-1));">
+                        </div>
+                        <div class="absolute -bottom-16 -left-16 w-48 h-48 rounded-full blur-3xl pointer-events-none"
+                            style="background: rgba(10,145,80, var(--blob-opacity-2));">
+                        </div>
+
+                        <div class="relative flex flex-col sm:flex-row items-center gap-8">
+                            <!-- AQI Ring -->
+                            <div class="flex-shrink-0 float">
+                                <svg width="170" height="170" viewBox="0 0 170 170" class="drop-shadow-lg">
+                                    <circle cx="85" cy="85" r="70" fill="none" stroke="var(--ring-track)"
+                                        stroke-width="12" />
+                                    <circle cx="85" cy="85" r="70" fill="none" stroke="url(#aqi-grad)" stroke-width="12"
+                                        stroke-linecap="round" stroke-dasharray="440" stroke-dashoffset="124"
+                                        transform="rotate(-90 85 85)" class="aqi-ring" id="aqi-ring-progress"
+                                        style="transition: stroke-dashoffset 1s ease, stroke 0.4s ease" />
+                                    <defs>
+                                        <linearGradient id="aqi-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#3acd7b" />
+                                            <stop offset="60%" stop-color="#f59e0b" />
+                                            <stop offset="100%" stop-color="#ef4444" />
+                                        </linearGradient>
+                                    </defs>
+                                    <text x="85" y="78" text-anchor="middle" fill="#fff" font-family="Outfit"
+                                        font-weight="800" font-size="42" id="aqi-main-value">—</text>
+                                    <text x="85" y="103" text-anchor="middle" fill="rgba(255,255,255,0.45)"
+                                        font-family="Outfit" font-weight="500" font-size="13">US AQI</text>
+                                </svg>
+                            </div>
+
+                            <!-- Info -->
+                            <div class="flex-1 text-center sm:text-left">
+                                <span
+                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold tracking-wide bg-white/10 text-white/50 mb-3"
+                                    id="aqi-main-badge">
+                                    <i class="ph-fill ph-circle-notch text-sm"></i>
+                                    LOADING…
+                                </span>
+                                <h2 class="text-2xl sm:text-3xl font-bold tracking-tight leading-snug text-white"
+                                    data-i18n="aqi_card_title">
+                                    Toshkent Umumiy AQI
+                                </h2>
+                                <p class="mt-2 text-[0.88rem] text-white/35 font-light leading-relaxed max-w-md"
+                                    data-i18n="aqi_card_desc" id="aqi-main-description">
+                                    Toshkentning barcha tumanlaridagi real vaqtdagi zarrachalar konsentratsiyasi va ifloslovchi darajalar.
+                                </p>
+                                <p class="mt-4 flex items-center gap-2 text-xs text-white/25 font-mono"
+                                    id="aqi-updated">
+                                    <i class="ph ph-clock text-sm"></i>
+                                    <span data-i18n="last_updated">Oxirgi yangilanish:</span> <span id="aqi-main-timestamp">—</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RECOMMENDATIONS CARD -->
+                    <div class="xl:col-span-2 flex flex-col gap-5 fade-up delay-3">
+
+                        <!-- Health Alert -->
+                        <div class="glass rounded-2xl p-6 flex-1 relative overflow-hidden noise border-l-4 border-white/10"
+                            id="recommendation-card">
+                            <div class="relative">
+                                <div class="flex items-center gap-2.5 mb-3">
+                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center"
+                                        style="background: var(--card-bg);">
+                                        <i class="ph-fill ph-shield-warning text-brand-400 text-lg"></i>
+                                    </div>
+                                    <h3 class="font-semibold t-primary text-[0.95rem]"
+                                        data-i18n="health_advisory">Sog'liqni saqlash maslahati</h3>
+                                </div>
+                                <ul class="space-y-2.5 text-[0.82rem] t-secondary leading-relaxed"
+                                    id="recommendation-text">
+                                    <li class="flex items-start gap-2 t-muted">
+                                        <i class="ph-bold ph-circle-notch mt-0.5 animate-spin"></i>
+                                        <span data-i18n="loading_advisory">Sog'liqni saqlash maslahati yuklanmoqda…</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Quick stats row -->
+                        <div class="grid grid-cols-3 gap-3">
+                            <!-- Dominant pollutant -->
+                            <div class="glass rounded-2xl px-5 py-4 flex items-center justify-between" id="dominant-card">
+                                <div>
+                                    <p class="text-xs t-muted font-medium tracking-wide uppercase"
+                                        data-i18n="dominant_pollutant">Asosiy Ifloslovchi</p>
+                                    <p class="text-lg font-bold t-primary mt-0.5" id="dominant-pollutant">—</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                                    <i class="ph-fill ph-drop text-red-400 text-xl"></i>
+                                </div>
+                            </div>
+                            <!-- Stations -->
+                            <div class="glass rounded-2xl px-5 py-4 flex items-center justify-between" id="stations-card">
+                                <div>
+                                    <p class="text-xs t-muted font-medium tracking-wide uppercase"
+                                        data-i18n="stations_label">Stansiyalar</p>
+                                    <p class="text-lg font-bold t-primary mt-0.5">11 <span class="text-xs font-normal t-muted" data-i18n="stations_online">onlayn</span></p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center">
+                                    <i class="ph-fill ph-broadcast text-brand-400 text-xl"></i>
+                                </div>
+                            </div>
+                            <!-- Humidity -->
+                            <div class="glass rounded-2xl px-5 py-4 flex items-center justify-between" id="humidity-card">
+                                <div>
+                                    <p class="text-xs t-muted font-medium tracking-wide uppercase"
+                                        data-i18n="humidity_label">Namlik</p>
+                                    <p class="text-lg font-bold t-primary mt-0.5" id="humidity-value">—</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                                    <i class="ph-fill ph-drop-half-bottom text-blue-400 text-xl"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- ── Pollutant Stat Pills ──────────────── -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 mt-6 fade-up delay-4">
+                    <div class="stat-pill glass rounded-xl px-4 py-4 text-center cursor-default" id="pill-pm25">
+                        <p class="text-[0.68rem] font-semibold t-muted tracking-widest uppercase mb-1">PM2.5</p>
+                        <p class="text-xl font-bold t-primary pill-value">—</p>
+                        <p class="text-[0.7rem] t-faint mt-0.5">µg/m³</p>
+                    </div>
+                    <div class="stat-pill glass rounded-xl px-4 py-4 text-center cursor-default" id="pill-pm10">
+                        <p class="text-[0.68rem] font-semibold t-muted tracking-widest uppercase mb-1">PM10</p>
+                        <p class="text-xl font-bold t-primary pill-value">—</p>
+                        <p class="text-[0.7rem] t-faint mt-0.5">µg/m³</p>
+                    </div>
+                    <div class="stat-pill glass rounded-xl px-4 py-4 text-center cursor-default" id="pill-o3">
+                        <p class="text-[0.68rem] font-semibold t-muted tracking-widest uppercase mb-1">O₃</p>
+                        <p class="text-xl font-bold t-primary pill-value">—</p>
+                        <p class="text-[0.7rem] t-faint mt-0.5">ppb</p>
+                    </div>
+                    <div class="stat-pill glass rounded-xl px-4 py-4 text-center cursor-default" id="pill-no2">
+                        <p class="text-[0.68rem] font-semibold t-muted tracking-widest uppercase mb-1">NO₂</p>
+                        <p class="text-xl font-bold t-primary pill-value">—</p>
+                        <p class="text-[0.7rem] t-faint mt-0.5">ppb</p>
+                    </div>
+                    <div class="stat-pill glass rounded-xl px-4 py-4 text-center cursor-default" id="pill-so2">
+                        <p class="text-[0.68rem] font-semibold t-muted tracking-widest uppercase mb-1">SO₂</p>
+                        <p class="text-xl font-bold t-primary pill-value">—</p>
+                        <p class="text-[0.7rem] t-faint mt-0.5">ppb</p>
+                    </div>
+                    <div class="stat-pill glass rounded-xl px-4 py-4 text-center cursor-default" id="pill-co">
+                        <p class="text-[0.68rem] font-semibold t-muted tracking-widest uppercase mb-1">CO</p>
+                        <p class="text-xl font-bold t-primary pill-value">—</p>
+                        <p class="text-[0.7rem] t-faint mt-0.5">ppm</p>
+                    </div>
+                </div>
+
+
+                <!-- ╔══════════════════════════════════════════════╗
+                   ║  AQI COLOR LEGEND BOX                         ║
+                   ╚══════════════════════════════════════════════╝ -->
+                <div class="glass rounded-2xl p-6 mt-6 fade-up delay-5" id="aqi-color-legend">
+                    <div class="flex items-center gap-2.5 mb-5">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: var(--card-bg);">
+                            <i class="ph-bold ph-palette text-brand-400 text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold t-primary text-[0.95rem]"
+                            data-i18n="color_legend_title">Ranglar nima anglatadi?</h3>
+                    </div>
+
+                    <div class="color-legend">
+                        <!-- Green — Good -->
+                        <div class="legend-item">
+                            <div class="legend-swatch" style="background: #22c55e;"></div>
+                            <div class="legend-info">
+                                <span class="legend-range" data-i18n="color_legend_range_good">0–50</span>
+                                <span class="legend-label" data-i18n="color_legend_label_good">Yaxshi</span>
+                                <span class="legend-desc" data-i18n="color_legend_desc_good">Havo sifati qoniqarli va xavf kam yoki umuman yo'q.</span>
+                            </div>
+                        </div>
+
+                        <!-- Amber — Moderate -->
+                        <div class="legend-item">
+                            <div class="legend-swatch" style="background: #f59e0b;"></div>
+                            <div class="legend-info">
+                                <span class="legend-range" data-i18n="color_legend_range_moderate">51–100</span>
+                                <span class="legend-label" data-i18n="color_legend_label_moderate">O'rtacha</span>
+                                <span class="legend-desc" data-i18n="color_legend_desc_moderate">Qabul qilinadi; ba'zi ifloslovchilar sezgir shaxslarga ta'sir qilishi mumkin.</span>
+                            </div>
+                        </div>
+
+                        <!-- Orange — Unhealthy for Sensitive -->
+                        <div class="legend-item">
+                            <div class="legend-swatch" style="background: #f97316;"></div>
+                            <div class="legend-info">
+                                <span class="legend-range" data-i18n="color_legend_range_unhealthy">101–150</span>
+                                <span class="legend-label" data-i18n="color_legend_label_unhealthy">Sezgir guruhlar uchun zararli</span>
+                                <span class="legend-desc" data-i18n="color_legend_desc_unhealthy">Sezgir guruhlar sog'lig'iga ta'sir ko'rsatishi mumkin.</span>
+                            </div>
+                        </div>
+
+                        <!-- Red — Hazardous -->
+                        <div class="legend-item">
+                            <div class="legend-swatch" style="background: #ef4444;"></div>
+                            <div class="legend-info">
+                                <span class="legend-range" data-i18n="color_legend_range_hazardous">151+</span>
+                                <span class="legend-label" data-i18n="color_legend_label_hazardous">Xavfli</span>
+                                <span class="legend-desc" data-i18n="color_legend_desc_hazardous">Har bir kishi jiddiy sog'liq ta'siriga duch kelishi mumkin.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+
+            <!-- ╔══════════════════════════════════════════════╗
+               ║  MAP SECTION                                  ║
+               ╚══════════════════════════════════════════════╝ -->
+            <section class="flex-1 flex flex-col px-5 sm:px-8 pb-8 fade-up delay-6" id="map-section">
+                <div class="flex items-end justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold t-primary tracking-tight"
+                            data-i18n="map_title">Sensor Xaritasi</h2>
+                        <p class="text-[0.82rem] t-muted font-light mt-0.5"
+                            data-i18n="map_subtitle">Toshkent tumanlari bo'ylab 11 ta monitoring stansiyasi</p>
+                    </div>
+                    <div class="hidden sm:flex items-center gap-3 text-[0.72rem] font-medium t-muted"
+                        id="map-legend">
+                        <span class="flex items-center gap-1"><span
+                                class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+                            <span data-i18n="legend_good">Yaxshi</span></span>
+                        <span class="flex items-center gap-1"><span
+                                class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+                            <span data-i18n="legend_moderate">O'rtacha</span></span>
+                        <span class="flex items-center gap-1"><span
+                                class="w-2.5 h-2.5 rounded-full bg-orange-500 inline-block"></span>
+                            <span data-i18n="legend_unhealthy">Zararli</span></span>
+                        <span class="flex items-center gap-1"><span
+                                class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span>
+                            <span data-i18n="legend_hazardous">Xavfli</span></span>
+                    </div>
+                </div>
+
+                <div id="map"
+                    class="w-full flex-1 min-h-[450px] rounded-2xl shadow-2xl overflow-hidden"
+                    style="z-index: 1; border: 1px solid var(--map-border);">
+                </div>
+            </section>
+
+
+            <!-- ╔══════════════════════════════════════════════╗
+               ║  FOOTER                                       ║
+               ╚══════════════════════════════════════════════╝ -->
+            <footer
+                class="px-5 sm:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs t-faint"
+                style="border-top: 1px solid var(--footer-border);"
+                id="footer">
+                <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 rounded-md bg-brand-500 flex items-center justify-center">
+                        <i class="ph-bold ph-wind text-white text-xs"></i>
+                    </div>
+                    <span class="font-semibold t-muted">TozaHavo</span>
+                    <span class="t-ghost">·</span>
+                    <span data-i18n="footer_rights">© 2026 Barcha huquqlar himoyalangan</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="#" class="hover:text-brand-400 transition" data-i18n="footer_privacy">Maxfiylik</a>
+                    <a href="#" class="hover:text-brand-400 transition" data-i18n="footer_terms">Shartlar</a>
+                    <a href="#" class="hover:text-brand-400 transition" data-i18n="footer_api">API</a>
+                    <a href="#" class="hover:text-brand-400 transition flex items-center gap-1">
+                        <i class="ph-bold ph-github-logo"></i> GitHub
+                    </a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+
+    <!-- ── Scripts ──────────────────────────────────── -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- ── Mobile Menu Logic ──────────────────────── -->
+    <script>
+    (function() {
+        var menuEl = document.getElementById('mobile-menu');
+        var backdrop = document.getElementById('mobile-backdrop');
+        var panel = document.getElementById('mobile-panel');
+        var openBtn = document.getElementById('mobile-menu-btn');
+        var closeBtn = document.getElementById('mobile-close');
+        if (!menuEl || !openBtn) return;
+
+        function openMenu() {
+            menuEl.style.display = '';
+            menuEl.classList.remove('pointer-events-none');
+            requestAnimationFrame(function() {
+                menuEl.classList.add('mobile-menu-open');
+            });
+            document.body.style.overflow = 'hidden';
+        }
+        function closeMenu() {
+            menuEl.classList.remove('mobile-menu-open');
+            document.body.style.overflow = '';
+            setTimeout(function() {
+                menuEl.classList.add('pointer-events-none');
+                menuEl.style.display = 'none';
+            }, 300);
+        }
+        openBtn.addEventListener('click', openMenu);
+        if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+        if (backdrop) backdrop.addEventListener('click', closeMenu);
+
+        // Close on nav link click
+        menuEl.querySelectorAll('[data-mobile-link]').forEach(function(a) {
+            a.addEventListener('click', closeMenu);
+        });
+
+        // Sync mobile lang switcher with main
+        var mobileLang = document.getElementById('mobile-lang-switcher');
+        var mainLang = document.getElementById('lang-switcher');
+        if (mobileLang) {
+            mobileLang.querySelectorAll('.lang-pill').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    var lang = this.getAttribute('data-lang');
+                    // Sync visual state
+                    mobileLang.querySelectorAll('.lang-pill').forEach(function(b){b.classList.remove('lang-pill--active');});
+                    this.classList.add('lang-pill--active');
+                    // Click the matching desktop button
+                    if (mainLang) {
+                        var dBtn = mainLang.querySelector('[data-lang="'+lang+'"]');
+                        if (dBtn) dBtn.click();
+                    }
+                });
+            });
+        }
+
+        // Sync mobile theme toggle
+        var mobileTheme = document.getElementById('mobile-theme-toggle');
+        var desktopTheme = document.getElementById('theme-toggle');
+        if (mobileTheme && desktopTheme) {
+            mobileTheme.addEventListener('click', function() {
+                desktopTheme.click();
+                // Update mobile icon/label
+                setTimeout(function() {
+                    var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                    var icon = document.getElementById('mobile-theme-icon');
+                    var label = document.getElementById('mobile-theme-label');
+                    if (icon) icon.className = isDark ? 'ph-bold ph-sun text-lg' : 'ph-bold ph-moon text-lg';
+                    if (label) label.textContent = isDark ? "Yorug' rejim" : "Qorong'u rejim";
+                }, 50);
+            });
+        }
+
+        // Init theme + i18n
+        if (typeof TozaTheme !== 'undefined') TozaTheme.init();
+        if (typeof TozaMap !== 'undefined') TozaMap.init();
+        if (typeof TozaI18n !== 'undefined') TozaI18n.init();
+    })();
+    </script>
+
+</body>
+
+</html>
