@@ -667,109 +667,231 @@
         .mobile-menu-open .mobile-panel { transform: translateX(0); }
 
         /* ═══════════════════════════════════════════════════
-           MOBILE RESPONSIVE — ≤768px
+           MOBILE RESPONSIVE — ≤768px  (IMPROVED v2)
            ═══════════════════════════════════════════════════ */
         @media (max-width: 768px) {
             * { -webkit-tap-highlight-color: transparent; }
             body { touch-action: manipulation; }
 
-            /* Navbar */
+            /* ── Navbar ─────────────────────────────────── */
             #nav-links, #lang-switcher, #theme-toggle { display: none !important; }
-            #live-indicator { display: flex !important; font-size: 0.65rem; padding: 4px 8px; }
-            .brand-text { font-size: 1rem !important; }
+            #live-indicator { display: flex !important; font-size: 0.62rem; padding: 3px 7px; }
+            #mobile-menu-btn { display: flex !important; }
 
-            /* Dashboard grid → single column */
+            /* ── Dashboard grid → single column ─────────── */
             .dashboard-grid {
                 grid-template-columns: 1fr !important;
                 min-height: auto;
             }
+            .dashboard-grid > main { order: 1; }
+            .dashboard-grid > aside { order: 2; }
 
-            /* Sidebar → horizontal scroll strip */
+            /* ── Sidebar → horizontal scroll strip ──────── */
             .sidebar-panel {
                 border-right: none !important;
+                border-top: 1px solid var(--sidebar-border);
                 border-bottom: 1px solid var(--sidebar-border);
                 max-height: none !important;
                 overflow-y: visible;
-                padding: 12px 16px !important;
-                order: 5;
+                overflow-x: hidden;
+                padding: 12px 0 12px 16px !important;
             }
-            .sidebar-panel > .mb-4 { display: none; }
+            .sidebar-panel > .mb-4 {
+                padding-right: 16px;
+                margin-bottom: 8px !important;
+            }
+            .sidebar-panel > .mb-4 p { display: none; }
             .sidebar-panel > .shimmer-line { display: none; }
+
             #district-list {
                 flex-direction: row !important;
-                overflow-x: auto;
+                flex-wrap: nowrap !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
                 scroll-snap-type: x mandatory;
-                gap: 12px;
+                gap: 10px;
                 padding-bottom: 8px;
+                padding-right: 16px;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
+                mask-image: linear-gradient(to right, black 85%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
             }
             #district-list::-webkit-scrollbar { display: none; }
+
             #district-list .district-card {
-                min-width: 155px;
+                min-width: 145px;
+                max-width: 165px;
                 flex-shrink: 0;
                 scroll-snap-align: start;
-                padding: 10px 12px;
+                padding: 10px;
+                gap: 8px;
             }
             #district-list .district-card:hover { transform: none; }
+            #district-list .district-card-gauge svg {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            #district-list .district-card-name { font-size: 0.78rem; }
 
-            /* AQI Hero Card */
+            /* ── Page heading ───────────────────────────── */
+            .fade-up.delay-2 h1 { font-size: 1.4rem !important; }
+            .fade-up.delay-2 p { font-size: 0.8rem !important; }
+
+            /* ── AQI Hero Card ──────────────────────────── */
             .glow-green { padding: 20px !important; }
-            .glow-green .absolute { width: 60% !important; height: 60% !important; }
-            .glow-green svg { width: 130px; height: 130px; }
-            .glow-green svg text#aqi-main-value { font-size: 34px; }
-            .glow-green .flex-col.sm\:flex-row { flex-direction: column !important; }
-            .glow-green .flex-1.text-center { text-align: center !important; }
-            .glow-green h2 { font-size: 1.25rem !important; }
-            .glow-green p.mt-2 { font-size: 0.8rem !important; }
+            .glow-green .absolute {
+                width: 50% !important;
+                height: 50% !important;
+                opacity: 0.6;
+            }
 
-            /* Recommendations */
-            #recommendation-card { padding: 16px !important; }
-            #recommendation-text { font-size: 0.78rem; }
+            .glow-green .relative.flex {
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 20px !important;
+            }
+            .glow-green .flex-shrink-0 svg {
+                width: 130px !important;
+                height: 130px !important;
+            }
+            .glow-green .flex-shrink-0 svg text[font-size="42"] {
+                font-size: 34px !important;
+            }
+            .glow-green .flex-1 {
+                text-align: center !important;
+            }
+            .glow-green .flex-1 h2 { font-size: 1.2rem !important; }
+            .glow-green .flex-1 p.mt-2 { font-size: 0.78rem !important; }
+            .glow-green .flex-1 p.mt-4 {
+                justify-content: center !important;
+                font-size: 0.65rem !important;
+                flex-wrap: wrap;
+            }
+            .glow-green .flex-1 .mb-3 { justify-content: center; }
 
-            /* Quick stats */
-            .grid.grid-cols-3 .glass.rounded-2xl .w-10 { display: none; }
-            #dominant-card, #stations-card, #humidity-card { padding: 10px 12px !important; }
-            #dominant-card p:first-child, #stations-card p:first-child, #humidity-card p:first-child { font-size: 0.6rem !important; }
-            #dominant-card p:last-of-type, #stations-card .text-lg, #humidity-value { font-size: 1rem !important; }
+            /* ── Top grid → single column ───────────────── */
+            .xl\\:grid-cols-5 { grid-template-columns: 1fr !important; }
+            .xl\\:col-span-3 { grid-column: span 1 !important; }
+            .xl\\:col-span-2 { grid-column: span 1 !important; }
 
-            /* Pollutant pills */
-            .grid.xl\:grid-cols-6 { grid-template-columns: repeat(3, 1fr) !important; gap: 8px; }
-            .stat-pill { padding: 10px 8px !important; }
-            .stat-pill .text-xl { font-size: 1rem !important; }
-            .stat-pill:hover { transform: none; }
+            /* ── Recommendation card ────────────────────── */
+            #recommendation-card { padding: 14px !important; }
+            #recommendation-text li { font-size: 0.78rem; }
+            #recommendation-text li span { font-size: 0.76rem !important; }
 
-            /* Color legend */
+            /* ── Quick stats row ─────────────────────────── */
+            .grid.grid-cols-3 { gap: 8px !important; }
+            #dominant-card, #stations-card, #humidity-card {
+                padding: 10px !important;
+                flex-direction: column !important;
+            }
+            #dominant-card .w-10, #stations-card .w-10, #humidity-card .w-10 {
+                display: none !important;
+            }
+            #dominant-card p:first-child,
+            #stations-card p:first-child,
+            #humidity-card p:first-child {
+                font-size: 0.55rem !important;
+            }
+            #dominant-pollutant,
+            #humidity-value {
+                font-size: 0.95rem !important;
+            }
+            #stations-card .text-lg { font-size: 0.95rem !important; }
+
+            /* ── Pollutant pills → 3 columns ────────────── */
+            .xl\\:grid-cols-6 {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 8px !important;
+            }
+            .stat-pill {
+                padding: 8px 6px !important;
+            }
+            .stat-pill .text-xl { font-size: 0.95rem !important; }
+            .stat-pill .text-\\[0\\.68rem\\] { font-size: 0.6rem !important; }
+            .stat-pill .text-\\[0\\.7rem\\] { font-size: 0.6rem !important; }
+            .stat-pill:hover { transform: none !important; }
+
+            /* ── Color legend → 2 columns ───────────────── */
+            .color-legend {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 8px !important;
+            }
+            .legend-item { padding: 10px; gap: 8px; }
+            .legend-swatch { width: 28px !important; height: 28px !important; border-radius: 8px; }
+            .legend-range { font-size: 0.65rem; }
+            .legend-label { font-size: 0.75rem; }
+            .legend-desc { font-size: 0.65rem; display: none; }
+
+            /* ── Map section ────────────────────────────── */
+            #map { min-height: 300px !important; }
+            #map-section { padding-left: 16px !important; padding-right: 16px !important; }
+            #map-section h2 { font-size: 1.05rem !important; }
+            #map-section > div:first-child {
+                flex-direction: column !important;
+                gap: 8px;
+                align-items: flex-start !important;
+            }
+            #map-legend {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 4px !important;
+                width: 100%;
+            }
+
+            /* ── Stats section padding ──────────────────── */
+            #stats-section { padding: 16px !important; }
+
+            /* ── Footer ─────────────────────────────────── */
+            footer {
+                flex-direction: column !important;
+                text-align: center;
+                gap: 12px !important;
+                padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+
+            /* ── Touch targets ──────────────────────────── */
+            button, a, .district-card, .lang-pill, .theme-toggle {
+                min-height: 44px;
+            }
+        }
+
+        /* ── Extra small screens (≤380px) ──────────────── */
+        @media (max-width: 380px) {
+            .glow-green .flex-shrink-0 svg {
+                width: 110px !important;
+                height: 110px !important;
+            }
+            .glow-green .flex-shrink-0 svg text[font-size="42"] {
+                font-size: 28px !important;
+            }
+            .glow-green .flex-1 h2 { font-size: 1.05rem !important; }
             .color-legend { grid-template-columns: 1fr !important; }
-            .legend-item { padding: 10px; }
-
-            /* Map section */
-            #map { min-height: 350px !important; }
-            #map-section h2 { font-size: 1.1rem !important; }
-
-            /* Footer */
-            footer { flex-direction: column !important; text-align: center; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important; }
-
-            /* Typography */
-            h1.text-2xl { font-size: 1.5rem !important; }
-            section .p-5 { padding: 16px !important; }
+            .color-legend .legend-desc { display: block; }
+            #district-list .district-card { min-width: 130px; }
+            .grid.grid-cols-3 { grid-template-columns: repeat(3, 1fr) !important; }
         }
 
         /* ── Safe areas (iPhone notch) ──────────────────── */
         @supports (padding: env(safe-area-inset-top)) {
             @media (max-width: 768px) {
                 #navbar { padding-top: env(safe-area-inset-top); }
-                footer { padding-bottom: env(safe-area-inset-bottom); }
+                footer { padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
                 .mobile-panel { padding-top: env(safe-area-inset-top); }
             }
         }
 
         /* ── Reduced motion ────────────────────────────── */
         @media (prefers-reduced-motion: reduce) {
-            .float, .pulse-soft, .pulse-live, .aqi-ring, .mini-ring, .fade-up, .card-stagger > * {
+            .float, .pulse-soft, .pulse-live, .aqi-ring, .mini-ring, .fade-up,
+            .card-stagger > *, .shimmer-line, .shimmer-line::after {
                 animation: none !important;
                 opacity: 1 !important;
                 transform: none !important;
+            }
+        }
+
             }
         }
     </style>
