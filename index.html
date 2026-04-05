@@ -1297,7 +1297,61 @@
                     style="z-index: 1; border: 1px solid var(--map-border);">
                 </div>
             </section>
+<!-- ╔══════════════════════════════════════════════╗
+               ║  ABOUT                                        ║
+               ╚══════════════════════════════════════════════╝ -->
+            <section class="px-5 sm:px-8 pb-10 fade-up" id="about">
+                <div class="glass rounded-2xl p-6 sm:p-8">
 
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6">
+
+                        <!-- Left: Mission -->
+                        <div class="max-w-md">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
+                                    <i class="ph-bold ph-wind text-white text-sm"></i>
+                                </div>
+                                <span class="text-sm font-bold t-primary">TozaHavo</span>
+                            </div>
+                            <p class="text-[0.82rem] t-secondary leading-relaxed" data-i18n="about_mission">
+                                Toshkent aholisiga real vaqtda havo sifati haqida aniq ma'lumot beruvchi ochiq platforma. 
+                                11 tuman bo'ylab AQI, PM2.5 va boshqa ifloslovchilarni kuzating.
+                            </p>
+                        </div>
+
+                        <!-- Right: Details -->
+                        <div class="flex flex-col gap-4 text-[0.78rem]">
+
+                            <div class="flex items-center gap-3">
+                                <i class="ph-bold ph-database text-brand-400"></i>
+                                <span class="t-secondary" data-i18n="about_sources">Manbalar: WAQI · IQAir · OpenWeatherMap</span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <i class="ph-bold ph-arrows-clockwise text-brand-400"></i>
+                                <span class="t-secondary" data-i18n="about_refresh">Har 5 daqiqada avtomatik yangilanadi</span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <i class="ph-bold ph-code text-brand-400"></i>
+                                <span class="t-secondary" data-i18n="about_stack">HTML · Tailwind CSS · JavaScript · Leaflet.js</span>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <i class="ph-bold ph-user text-brand-400"></i>
+                                <span class="t-secondary">
+                                    <span data-i18n="about_created_by">Yaratuvchi:</span>
+                                    <a href="https://github.com/OzodWave" target="_blank" class="text-brand-400 hover:text-brand-300 font-semibold transition ml-1">
+                                        Ozodbek Xasanboyev <i class="ph-bold ph-arrow-up-right text-[0.6rem]"></i>
+                                    </a>
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
 
             <!-- ╔══════════════════════════════════════════════╗
                ║  FOOTER                                       ║
@@ -1315,10 +1369,10 @@
                     <span data-i18n="footer_rights">© 2026 Barcha huquqlar himoyalangan</span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <a href="#" class="hover:text-brand-400 transition" data-i18n="footer_privacy">Maxfiylik</a>
-                    <a href="#" class="hover:text-brand-400 transition" data-i18n="footer_terms">Shartlar</a>
-                    <a href="#" class="hover:text-brand-400 transition" data-i18n="footer_api">API</a>
-                    <a href="#" class="hover:text-brand-400 transition flex items-center gap-1">
+                    <a href="#about" class="hover:text-brand-400 transition" data-i18n="footer_privacy">Maxfiylik</a>
+                    <a href="#about" class="hover:text-brand-400 transition" data-i18n="footer_terms">Shartlar</a>
+                    <a href="#about" class="hover:text-brand-400 transition" data-i18n="footer_api">API</a>
+                    <a href="#about" class="hover:text-brand-400 transition flex items-center gap-1">
                         <i class="ph-bold ph-github-logo"></i> GitHub
                     </a>
                 </div>
